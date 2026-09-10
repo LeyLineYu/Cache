@@ -128,17 +128,17 @@ clean:
 	rm -f -r $(ARTIFACT_PATH)
 	mkdir -p $(ARTIFACT_PATH)
 
-TODO_FILE     := TODO.txt
+TODO_FILE := TODO.txt
 
 TODO_EXCLUDED_FILES := Makefile .gitignore
-TODO_EXCLUDED_FILES := $(TODO_EXCLUDED:%=--exclude="%")
+TODO_EXCLUDED_FILES := $(foreach i,$(TODO_EXCLUDED_FILES),--exclude="$(i)")
 
 TODO_EXCLUDED_DIRS := .git
-TODO_EXCLUDED_DIRS := $(TODO_EXCLUDED_DIRS:%=--exclude-dir="%")
+TODO_EXCLUDED_DIRS := $(foreach i,$(TODO_EXCLUDED_DIRS),--exclude-dir="$(i)")
 
 update_todo:
 	@echo -e "• Updating $(TODO_FILE)"
 	@rm -f $(TODO_FILE)
-	@grep -r -n "TODO" $(TODO_EXCLUDED)      \
-	                   $(TODO_EXCLUDED_DIRS) \
-										 | sed G >> $(TODO_FILE)
+	@grep -r -n "TODO"  $(TODO_EXCLUDED_FILES) \
+	                    $(TODO_EXCLUDED_DIRS)  \
+							  			| sed G >> $(TODO_FILE)
