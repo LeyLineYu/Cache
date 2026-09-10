@@ -12,48 +12,51 @@ int is_cache_hit(std::list<int>& list, int value) {
   return 0;
 }
 
-int *lru_cache(std::list<int>& list, int value) {
+void lru_miss(std::list<int>& list, int value) {
+  list.push_front(value);
+  list.pop_back();
+}
+
+void lru_hit(std::list<int>& list, int value) {
+  if (*list.begin() == value)
+    return;
+
+  list.push_front(value);
+
+  for (auto it = ++list.begin(); it != list.end(); it++) {
+    if (*it == value) {
+      list.erase(it);
+      break;
+    }
+  }
+}
+
+auto lru_cache(std::list<int>& list, int value) {
   int is_hit = is_cache_hit(list, value);
 
-  if (is_hit != NULL)
-    return NULL;
+  if (is_hit) {
+    lru_hit(list, value);
+  } else {
+    lru_miss(list, value);
+  }
 
-
-  return NULL;
+  return list.begin();
 }
 
 int main() {
-/*
-  std::cout << "Hello World!" << std::endl;
-  std::list myList{10, 5, 5, 3, 1, -1, 4, 5, 6};
-  printList(myList);
+  std::list myList{1, 2, 3, 4, 5};
+  int value;
 
-  myList.push_back(100);
-  myList.push_front(300);
-  printList(myList);
-
-  myList.erase(myList.begin());
-  printList(myList);
-
-  std::list<int>::iterator itBegin = myList.begin();
-  std::list<int>::iterator itEnd = myList.begin();
-  std::advance(itBegin, 3);
-  std::advance(itEnd, 9);
-  myList.erase(itBegin, itEnd);
-  printList(myList);
-  return 0;
-*/
-
-  std::list myList{10, 5, 5, 3, 1, -1, 4, 5, 6};
-  int x = is_cache_hit(myList, 100);
-
-  std::cout << x << std::endl;
-
+  for (int i = 0; i < 10; i++) {
+    std::cin >> value;
+    auto x = lru_cache(myList, value);
+    printList(myList);
+  }
   return 0;
 }
 
-void printList(std::list<int>& myList) {
-  for (int i : myList)
+void printList(std::list<int>& list) {
+  for (int i : list)
     std::cout << i << ' ';
   std::cout << std::endl;
 }
