@@ -1,4 +1,19 @@
 # TODO: use environment variables (CXX FLAGS, CC, etc.)
+#
+# -----------------------------
+# Makefile commands:
+#		`make`             - same as `make debug`
+#		`make debug`       - build the target without optimizations 
+#		                       and with sanitizers, then update todo
+#		`make release`     - build the target with optimizations 
+#		                       and no debug features, nor sanitizers
+#		`make clean`       - delete artifacts and the target
+#		`make clear`       - same as `make clean`
+#		`make update_todo` - grep the project for TODO's and 
+#		                       store them in $(TODO_FILE)
+# -----------------------------
+#
+#
 COMPILER := g++
 
 ARTIFACT_PATH := build
@@ -20,19 +35,13 @@ RELEASE_DEFINE_FLAGS := -D NDEBUG
 
 PROG_NAME     := cache
 MAIN_TARGET   := $(BINARY_PATH)/$(PROG_NAME)
-TODO_FILE     := TODO.txt
 
 # Source files (src/ is autoappended)
-SOURCES       := main.cpp
-SOURCES       := $(patsubst %.cpp, $(SOURCE_PATH)/%.cpp, $(SOURCES))
+RAW_SOURCES   := main.cpp
+SOURCES       := $(patsubst %.cpp, $(SOURCE_PATH)/%.cpp, $(RAW_SOURCES))
 
-# Simple patsubst that's used a few times
-define to_object
-  $(patsubst $(SOURCE_PATH)/%.cpp, $(ARTIFACT_PATH)/%.o, $(1))
-endef
-
-OBJECTS      := $(call to_object,$(SOURCES))
-DEPENDENCIES := $(OBJECTS:.o=.d)
+OBJECTS      := $(RAW_SOURCES:%.cpp=$(ARTIFACT_PATH)/%.o)
+DEPENDENCIES := $(OBJECTS:%.o=%.d)
 
 SANITIZER_FLAGS := -fsanitize=address,alignment,bool,bounds,enum,$\
 		 		           float-cast-overflow,float-divide-by-zero,$\
@@ -49,24 +58,26 @@ DEBUG_CXX_FLAGS := -ggdb3 -O0 \
 RELEASE_CXX_FLAGS := -O3
 
 # Common flags
-CXX_FLAGS := -Wall -Wextra                                                  \
-  				   -Waggressive-loop-optimizations                                \
-  				   -Wmissing-declarations -Wcast-align -Wcast-qual                \
-  				   -Wchar-subscripts                                              \
-  				   -Wconversion  -Wempty-body                                     \
-  				   -Wfloat-equal -Wformat-nonliteral -Wformat-security            \
-  				   -Wformat-signedness -Wformat=2 -Winline -Wlogical-op           \
-  				   -Wopenmp-simd                                                  \
-  				   -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls         \
-  				   -Wshadow -Wsign-conversion                                     \
-  				   -Wstrict-overflow=2 -Wsuggest-attribute=noreturn               \
-  				   -Wsuggest-final-methods -Wsuggest-final-types                  \
-  				   -Wsync-nand                                                    \
-  				   -Wundef -Wunreachable-code -Wunused -Wuseless-cast             \
-  				   -Wvariadic-macros                                              \
-  				   -Wno-missing-field-initializers -Wno-narrowing                 \
-  				   -Wno-varargs -fstrict-overflow                                 \
-  				   -Wstack-usage=8192 -pie -fPIE -Werror=vla
+CXX_FLAGS := -std=c++17 -Wall -Wextra -Weffc++                         \
+						 -Waggressive-loop-optimizations                           \
+						 -Wc++14-compat -Wmissing-declarations -Wcast-align        \
+						 -Wcast-qual -Wchar-subscripts -Wconditionally-supported   \
+						 -Wconversion -Wctor-dtor-privacy -Wempty-body             \
+						 -Wfloat-equal -Wformat-nonliteral -Wformat-security       \
+						 -Wformat-signedness -Wformat=2 -Winline -Wlogical-op      \
+						 -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual     \
+						 -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls    \
+						 -Wshadow -Wsign-conversion -Wsign-promo                   \
+						 -Wstrict-null-sentinel -Wstrict-overflow=2                \
+						 -Wsuggest-attribute=noreturn -Wsuggest-final-methods      \
+						 -Wsuggest-final-types -Wsuggest-override -Wswitch-default \
+						 -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code      \
+						 -Wunused -Wuseless-cast -Wvariadic-macros                 \
+						 -Wno-literal-suffix -Wno-missing-field-initializers       \
+						 -Wno-narrowing -Wno-old-style-cast -Wno-varargs           \
+						 -fcheck-new -fsized-deallocation -fstrict-overflow        \
+						 -flto-odr-type-merging -Wstack-usage=8192                 \
+						 -pie -fPIE -Werror=vla
 
 .PHONY: debug debug_prehook release
 
@@ -102,19 +113,29 @@ $(ARTIFACT_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	@$(COMPILER) -c -MMD $(DEFINE_FLAGS) \
 	             $(INCLUDE_FLAGS) $(LIBS) $(CXX_FLAGS) $< -o $@
 
-.PHONY: ensure_directories_exist clean build update_todo
+.PHONY: ensure_directories_exist clean clear build update_todo
 
 ensure_directories_exist:
 	mkdir -p $(BINARY_PATH) $(ARTIFACT_PATH)
+
+clear: clean
 
 clean:
 	rm -f $(MAIN_TARGET)
 	rm -f -r $(ARTIFACT_PATH)
 	mkdir -p $(ARTIFACT_PATH)
 
+TODO_FILE     := TODO.txt
+
+TODO_EXCLUDED_FILES := Makefile .gitignore
+TODO_EXCLUDED_FILES := $(TODO_EXCLUDED:%=--exclude="%")
+
+TODO_EXCLUDED_DIRS := .git
+TODO_EXCLUDED_DIRS := $(TODO_EXCLUDED_DIRS:%=--exclude-dir="%")
+
 update_todo:
 	@echo -e "• Updating $(TODO_FILE)"
 	@rm -f $(TODO_FILE)
-	@grep -r -n "TODO" --exclude="Makefile" \
-	                   --exclude=".gitignore" \
-										 --exclude-dir=.git | sed G >> $(TODO_FILE)
+	@grep -r -n "TODO" $(TODO_EXCLUDED)      \
+	                   $(TODO_EXCLUDED_DIRS) \
+										 | sed G >> $(TODO_FILE)
