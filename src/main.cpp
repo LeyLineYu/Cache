@@ -1,7 +1,33 @@
+// TODO <name>_hit and <name>_miss should return adress
+
 #include <iostream>
 #include <list>
 
 void printList(std::list<int>& myList);
+int is_cache_hit(std::list<int>& list, int value);
+std::list<int>::iterator lru_cache(std::list<int>& list, int value);
+void lru_hit(std::list<int>& list, int value);
+void lru_miss(std::list<int>& list, int value);
+std::list<int>::iterator fifo_cache(std::list<int>&list, int value);
+void fifo_miss(std::list<int>& list, int value);
+
+int main() {
+  std::list myList{1, 2, 3, 4, 5};
+  int value;
+
+  for (int i = 0; i < 10; i++) {
+    std::cin >> value;
+    fifo_cache(myList, value);
+    printList(myList);
+  }
+  return 0;
+}
+
+void printList(std::list<int>& list) {
+  for (int i : list)
+    std::cout << i << ' ';
+  std::cout << std::endl;
+}
 
 int is_cache_hit(std::list<int>& list, int value) {
   for (int i : list) {
@@ -12,9 +38,16 @@ int is_cache_hit(std::list<int>& list, int value) {
   return 0;
 }
 
-void lru_miss(std::list<int>& list, int value) {
-  list.push_front(value);
-  list.pop_back();
+std::list<int>::iterator lru_cache(std::list<int>& list, int value) {
+  int is_hit = is_cache_hit(list, value);
+
+  if (is_hit) {
+    lru_hit(list, value);
+  } else {
+    lru_miss(list, value);
+  }
+
+  return list.begin();
 }
 
 void lru_hit(std::list<int>& list, int value) {
@@ -31,32 +64,24 @@ void lru_hit(std::list<int>& list, int value) {
   }
 }
 
-auto lru_cache(std::list<int>& list, int value) {
+void lru_miss(std::list<int>& list, int value) {
+  list.push_front(value);
+  list.pop_back();
+}
+
+std::list<int>::iterator fifo_cache(std::list<int>&list, int value) {
   int is_hit = is_cache_hit(list, value);
 
-  if (is_hit) {
-    lru_hit(list, value);
-  } else {
-    lru_miss(list, value);
-  }
+  if (!is_hit)
+    fifo_miss(list, value);
 
-  return list.begin();
+  for (auto it = list.begin(); it != list.end(); it++) {
+    if (*it == value)
+      return it;
+  }
 }
 
-int main() {
-  std::list myList{1, 2, 3, 4, 5};
-  int value;
-
-  for (int i = 0; i < 10; i++) {
-    std::cin >> value;
-    auto x = lru_cache(myList, value);
-    printList(myList);
-  }
-  return 0;
-}
-
-void printList(std::list<int>& list) {
-  for (int i : list)
-    std::cout << i << ' ';
-  std::cout << std::endl;
+void fifo_miss(std::list<int>& list, int value) {
+  list.push_front(value);
+  list.pop_back();
 }
