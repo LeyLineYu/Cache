@@ -79,7 +79,9 @@ CXX_FLAGS := -std=c++17 -Wall -Wextra -Weffc++                         \
 						 -flto-odr-type-merging -Wstack-usage=8192                 \
 						 -pie -fPIE -Werror=vla
 
-.PHONY: debug debug_prehook release
+.PHONY: debug debug_prehook     \
+	      release release_prehook \
+				build
 
 # Default debug target ('make' == 'make debug')
 debug: debug_prehook build update_todo
@@ -113,7 +115,8 @@ $(ARTIFACT_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	@$(COMPILER) -c -MMD $(DEFINE_FLAGS) \
 	             $(INCLUDE_FLAGS) $(LIBS) $(CXX_FLAGS) $< -o $@
 
-.PHONY: ensure_directories_exist clean clear build update_todo
+.PHONY: ensure_directories_exist \
+	      clean clear build update_todo
 
 ensure_directories_exist:
 	mkdir -p $(BINARY_PATH) $(ARTIFACT_PATH)
