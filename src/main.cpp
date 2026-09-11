@@ -1,7 +1,16 @@
 // TODO <name>_hit and <name>_miss should return adress
+// TODO Removing should be realized by lst.remove_if()
+// TODO To figure out smth with the structure of cache
+// TODO To realize normal data input
+// TODO To realize config
 
 #include <iostream>
 #include <list>
+
+struct Cache {
+  std::list<int> data;
+  std::list<int> freq;
+};
 
 void printList(std::list<int>& myList);
 int is_cache_hit(std::list<int>& list, int value);
@@ -12,7 +21,7 @@ std::list<int>::iterator fifo_cache(std::list<int>&list, int value);
 void fifo_miss(std::list<int>& list, int value);
 
 int main() {
-  std::list myList{1, 2, 3, 4, 5};
+  std::list<int> myList(5);
   int value;
 
   for (int i = 0; i < 10; i++) {
