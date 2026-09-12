@@ -7,11 +7,42 @@
 #include <iostream>
 #include <list>
 
-struct Cache {
-  std::list<int> data;
-  std::list<int> freq;
+namespace caches {
+
+enum CacheTypes {
+  LRU,
+  FIFO
 };
 
+template <typename ValueT, typename KeyT = int> 
+struct lru_cache {
+  size_t cap_;
+  std::list<ValueT> data_;
+
+  bool is_full() const {
+    return (data_.size() == cap_);
+  }
+
+  // TODO switch to ValueT
+
+//  std::list<int>::iterator get(ValueT value);
+
+  std::list<int>::iterator get(ValueT value) {
+    return data_.begin();
+  }
+
+
+  lru_cache(size_t cap) : cap_(cap) {}
+};
+/* That code has an error
+
+template <typename ValueT>
+std::list<int>::iterator lru_cache<ValueT>::get(ValueT value) {
+  return data_.begin();
+}
+*/
+}
+/*
 void printList(std::list<int>& myList);
 int is_cache_hit(std::list<int>& list, int value);
 std::list<int>::iterator lru_cache(std::list<int>& list, int value);
@@ -19,19 +50,23 @@ void lru_hit(std::list<int>& list, int value);
 void lru_miss(std::list<int>& list, int value);
 std::list<int>::iterator fifo_cache(std::list<int>&list, int value);
 void fifo_miss(std::list<int>& list, int value);
+*/
 
 int main() {
-  std::list<int> myList(5);
-  int value;
+  size_t n = 0, m = 0;
+  int value = 0;
 
-  for (int i = 0; i < 10; i++) {
+  std::cin >> m >> n;
+  caches::lru_cache<int> c{m};
+
+  for (int i = 0; i < n; i++) {
     std::cin >> value;
-    fifo_cache(myList, value);
-    printList(myList);
+    c.get(value);
   }
   return 0;
 }
 
+/*
 void printList(std::list<int>& list) {
   for (int i : list)
     std::cout << i << ' ';
@@ -94,3 +129,4 @@ void fifo_miss(std::list<int>& list, int value) {
   list.push_front(value);
   list.pop_back();
 }
+*/
