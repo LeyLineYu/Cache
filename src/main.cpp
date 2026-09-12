@@ -1,8 +1,8 @@
 // TODO <name>_hit and <name>_miss should return adress
 // TODO Removing should be realized by lst.remove_if()
-// TODO To figure out smth with the structure of cache
-// TODO To realize normal data input
-// TODO To realize config
+// TODO Figure out smth with the structure of cache
+// TODO Implement normal data input
+// TODO Implement config
 
 #include <iostream>
 #include <list>
@@ -23,53 +23,52 @@ struct lru_cache {
     return (data_.size() == cap_);
   }
 
-  typename std::list<ValueT>::iterator get(KeyT key);
+  // TODO придумать другое имя
+  bool get(KeyT key);
 
-
-  lru_cache(size_t cap) : cap_(cap) {
-    // не доделанный конструктор, жалуется на неинициализированный data_
-    // по идее просто добавь в list-initializer сверху -leo
-  }
+  // TODO Обновить конструктор
+  lru_cache(size_t cap, std::initializer_list<ValueT> data) :
+  cap_(cap), data_(data) {}
 };
 
 template <typename ValueT, typename KeyT>
-typename std::list<ValueT>::iterator 
-lru_cache<ValueT, KeyT>::get(KeyT key) {
-  return data_.begin(); // ? wrong implementation ? -leo
+bool lru_cache<ValueT, KeyT>::get(KeyT key) {
+
+
+
+
+
+  return true; // ? wrong implementation ? -leo
 }
 
+
 }
-/*
-void printList(std::list<int>& myList);
-int is_cache_hit(std::list<int>& list, int value);
-std::list<int>::iterator lru_cache(std::list<int>& list, int value);
-void lru_hit(std::list<int>& list, int value);
-void lru_miss(std::list<int>& list, int value);
-std::list<int>::iterator fifo_cache(std::list<int>&list, int value);
-void fifo_miss(std::list<int>& list, int value);
-*/
+
+void printList(std::list<int>& list);
 
 int main() {
   size_t n = 0, m = 0;
   int value = 0;
 
   std::cin >> m >> n;
-  caches::lru_cache<int> c{m};
+  caches::lru_cache<int> c{m, {}};
 
+  
   for (size_t i = 0; i < n; i++) {
     std::cin >> value;
     c.get(value);
+    printList(c.data_);
   }
   return 0;
 }
 
-/*
 void printList(std::list<int>& list) {
   for (int i : list)
     std::cout << i << ' ';
   std::cout << std::endl;
 }
 
+/*
 int is_cache_hit(std::list<int>& list, int value) {
   for (int i : list) {
     if (i == value) {
