@@ -23,24 +23,21 @@ struct lru_cache {
     return (data_.size() == cap_);
   }
 
-  // TODO switch to ValueT
+  typename std::list<ValueT>::iterator get(KeyT key);
 
-//  std::list<int>::iterator get(ValueT value);
 
-  std::list<int>::iterator get(ValueT value) {
-    return data_.begin();
+  lru_cache(size_t cap) : cap_(cap) {
+    // не доделанный конструктор, жалуется на неинициализированный data_
+    // по идее просто добавь в list-initializer сверху -leo
   }
-
-
-  lru_cache(size_t cap) : cap_(cap) {}
 };
-/* That code has an error
 
-template <typename ValueT>
-std::list<int>::iterator lru_cache<ValueT>::get(ValueT value) {
-  return data_.begin();
+template <typename ValueT, typename KeyT>
+typename std::list<ValueT>::iterator 
+lru_cache<ValueT, KeyT>::get(KeyT key) {
+  return data_.begin(); // ? wrong implementation ? -leo
 }
-*/
+
 }
 /*
 void printList(std::list<int>& myList);
@@ -59,7 +56,7 @@ int main() {
   std::cin >> m >> n;
   caches::lru_cache<int> c{m};
 
-  for (int i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     std::cin >> value;
     c.get(value);
   }
